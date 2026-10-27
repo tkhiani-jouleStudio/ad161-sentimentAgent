@@ -1,0 +1,10 @@
+apiVersion: solution.sap/v1
+kind: Solution
+
+metadata:
+  name: feedback-classifier-e40dc
+  version: 1.0.0
+  description: AI agent that classifies feedback as positive, negative, or neutral with a confidence score and reasoning in under 1 second.
+
+assets:
+  - ref: ./assets/feedback-classifier-agent/asset.yaml

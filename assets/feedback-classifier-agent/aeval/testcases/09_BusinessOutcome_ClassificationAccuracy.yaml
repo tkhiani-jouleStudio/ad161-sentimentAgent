@@ -1,0 +1,42 @@
+id: 09_BusinessOutcome_ClassificationAccuracy
+description: >
+  Business Outcome — verifies the agent advances the Classification accuracy metric
+  toward the target of at least 90% by correctly classifying a representative set
+  of three clearly labelled feedback items in a single session.
+tags:
+  - correctness
+  - business_outcome
+test_steps:
+  - type: dynamic_conversation
+    user_agent:
+      task_summary: |
+        You are a CX analyst running an accuracy spot-check. Submit three feedback items
+        one at a time and verify each classification is correct before moving on.
+
+        Item 1 (expected: positive):
+        "Outstanding customer support — the team went above and beyond to help me."
+
+        Item 2 (expected: negative):
+        "The product stopped working after one week and no one helped me fix it."
+
+        Item 3 (expected: neutral):
+        "Order was processed and shipped. Nothing to complain about, nothing special."
+
+        Submit item 1 first. After receiving the classification, submit item 2.
+        After that, submit item 3. Note the sentiment label returned for each.
+    max_turns: 8
+    agent_response_validations:
+      - check: >
+          [BUSINESS_METRIC: Classification accuracy] For the first feedback item about
+          outstanding customer support, the agent returns a sentiment of positive.
+      - check: >
+          [BUSINESS_METRIC: Classification accuracy] For the second feedback item about
+          the product stopping working and no help received, the agent returns a sentiment
+          of negative.
+      - check: >
+          [BUSINESS_METRIC: Classification accuracy] For the third feedback item about
+          the order being processed and nothing special, the agent returns a sentiment
+          of neutral.
+      - check: 'The agent includes a confidence score and a reasoning statement for each of the three classifications.'
+    rule_compliance_validations:
+      - check: 'Across all three classifications, the agent does not introduce information not present in each respective feedback text.'

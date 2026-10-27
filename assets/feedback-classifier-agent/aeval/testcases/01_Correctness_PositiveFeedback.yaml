@@ -1,0 +1,40 @@
+id: 01_Correctness_PositiveFeedback
+description: >
+  Happy path — clearly positive feedback. Verifies the agent calls classify_sentiment
+  with the full input text, returns sentiment=positive, a confidence score between 0.0
+  and 1.0, and a reasoning that references the input content.
+tags:
+  - correctness
+test_steps:
+  - type: dynamic_conversation
+    user_agent:
+      task_summary: |
+        You are a CX analyst. You want to classify a piece of customer feedback.
+        Submit the following feedback text for classification:
+        "I absolutely love this product! The setup was effortless and the support team
+        resolved my issue within minutes. I would recommend it to everyone."
+        You know the full text above and want the agent to classify it.
+        You do not know what sentiment it will return — you are waiting for the result.
+      initial_message: >
+        Please classify this feedback: "I absolutely love this product! The setup was
+        effortless and the support team resolved my issue within minutes. I would recommend
+        it to everyone."
+    max_turns: 3
+    agent_response_validations:
+      - check: 'The agent returns a sentiment of positive for the submitted feedback.'
+      - check: 'The agent includes a confidence score that is a number between 0.0 and 1.0 in its response.'
+      - check: 'The agent includes a reasoning statement that references specific content from the feedback text, such as the ease of setup, the support team, or the recommendation.'
+    rule_compliance_validations:
+      - check: 'The agent does not introduce information not present in the input feedback text, such as product names, pricing, or context the user never provided.'
+    tool_validations:
+      expected_tool_calls:
+        - tool: classify_sentiment
+          parameters:
+            feedback_text:
+              check: >
+                The parameter contains the full feedback text about loving the product,
+                effortless setup, and the support team resolving the issue within minutes.
+          output:
+            check: >
+              The tool returns a JSON object with sentiment set to positive, a confidence
+              value between 0.0 and 1.0, and a reasoning string of one to two sentences.

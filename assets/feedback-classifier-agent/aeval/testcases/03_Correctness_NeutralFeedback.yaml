@@ -1,0 +1,36 @@
+id: 03_Correctness_NeutralFeedback
+description: >
+  Happy path — neutral feedback. Verifies sentiment=neutral is returned with
+  a confidence score and reasoning grounded in the input text.
+tags:
+  - correctness
+test_steps:
+  - type: dynamic_conversation
+    user_agent:
+      task_summary: |
+        You are a CX analyst. You want to classify a piece of customer feedback.
+        Submit the following feedback text for classification:
+        "The product arrived on time. It works as described in the manual.
+        Nothing particularly stood out as exceptional or problematic."
+        You know the full text above and want the agent to classify it.
+        You do not know what sentiment it will return — you are waiting for the result.
+      initial_message: >
+        Please classify this feedback: "The product arrived on time. It works as described
+        in the manual. Nothing particularly stood out as exceptional or problematic."
+    max_turns: 3
+    agent_response_validations:
+      - check: 'The agent returns a sentiment of neutral for the submitted feedback.'
+      - check: 'The agent includes a confidence score that is a number between 0.0 and 1.0 in its response.'
+      - check: 'The agent includes a reasoning statement that references specific content from the feedback, such as on-time delivery, functionality matching the manual, or absence of strong sentiment.'
+    tool_validations:
+      expected_tool_calls:
+        - tool: classify_sentiment
+          parameters:
+            feedback_text:
+              check: >
+                The parameter contains the full feedback text about on-time delivery,
+                the product working as described, and nothing exceptional or problematic.
+          output:
+            check: >
+              The tool returns a JSON object with sentiment set to neutral, a confidence
+              value between 0.0 and 1.0, and a non-empty reasoning string.

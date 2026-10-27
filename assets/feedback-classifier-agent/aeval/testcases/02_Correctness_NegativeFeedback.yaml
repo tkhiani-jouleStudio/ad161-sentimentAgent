@@ -1,0 +1,39 @@
+id: 02_Correctness_NegativeFeedback
+description: >
+  Happy path — clearly negative feedback. Verifies sentiment=negative is returned with
+  a confidence score and reasoning grounded in the input text.
+tags:
+  - correctness
+test_steps:
+  - type: dynamic_conversation
+    user_agent:
+      task_summary: |
+        You are a CX analyst. You want to classify a piece of customer feedback.
+        Submit the following feedback text for classification:
+        "This was a terrible experience. The product broke after two days and customer
+        service was completely unhelpful. I want a full refund immediately."
+        You know the full text above and want the agent to classify it.
+        You do not know what sentiment it will return — you are waiting for the result.
+      initial_message: >
+        Classify this feedback: "This was a terrible experience. The product broke after
+        two days and customer service was completely unhelpful. I want a full refund
+        immediately."
+    max_turns: 3
+    agent_response_validations:
+      - check: 'The agent returns a sentiment of negative for the submitted feedback.'
+      - check: 'The agent includes a confidence score that is a number between 0.0 and 1.0 in its response.'
+      - check: 'The agent includes a reasoning statement that references specific content from the feedback, such as the product breaking, unhelpful service, or the refund request.'
+    rule_compliance_validations:
+      - check: 'The agent does not fabricate additional context such as the product model, refund policy, or prior interactions that were not present in the input text.'
+    tool_validations:
+      expected_tool_calls:
+        - tool: classify_sentiment
+          parameters:
+            feedback_text:
+              check: >
+                The parameter contains the full feedback text about the terrible experience,
+                the broken product, unhelpful customer service, and the refund request.
+          output:
+            check: >
+              The tool returns a JSON object with sentiment set to negative, a confidence
+              value between 0.0 and 1.0, and a non-empty reasoning string.

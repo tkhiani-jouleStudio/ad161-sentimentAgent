@@ -1,0 +1,47 @@
+id: 10_BusinessOutcome_ResponseTimeSinglePass
+description: >
+  Business Outcome — verifies the agent meets the Response time per classification
+  target of one second by completing classification in a single tool call with no
+  additional retrieval loops or sequential tool calls.
+tags:
+  - correctness
+  - business_outcome
+test_steps:
+  - type: dynamic_conversation
+    user_agent:
+      task_summary: |
+        You are a CX analyst. Submit the following feedback for classification:
+        "The onboarding process was smooth and the documentation was clear and well
+        organised. I found everything I needed without contacting support."
+        You expect the agent to return a classification immediately.
+        You are checking that it does not ask follow-up questions or make
+        multiple calls before responding.
+      initial_message: >
+        Classify this feedback: "The onboarding process was smooth and the documentation
+        was clear and well organised. I found everything I needed without contacting
+        support."
+    max_turns: 2
+    agent_response_validations:
+      - check: >
+          [BUSINESS_METRIC: Response time per classification] The agent returns a complete
+          classification — sentiment, confidence, and reasoning — in its first response,
+          without asking follow-up questions or requesting additional information.
+      - check: 'The agent returns a sentiment of positive for the feedback about smooth onboarding and clear documentation.'
+    rule_compliance_validations:
+      - check: >
+          The agent completes the classification in a single pass and does not introduce
+          intermediate reasoning steps, clarification turns, or additional tool calls
+          beyond the single classify_sentiment invocation.
+    tool_validations:
+      expected_tool_calls:
+        - tool: classify_sentiment
+          parameters:
+            feedback_text:
+              check: >
+                The parameter contains the full feedback text about smooth onboarding,
+                clear documentation, and finding everything without contacting support.
+          output:
+            check: >
+              The tool returns a JSON object with sentiment set to positive, a confidence
+              value between 0.0 and 1.0, and a reasoning string referencing the
+              onboarding experience or documentation quality.
